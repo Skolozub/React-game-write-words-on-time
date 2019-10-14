@@ -1,4 +1,5 @@
-// write logic 1h 20m
+// init git (write all logic) - 1h 20m
+// code refactoring - 10m
 
 import React from "react";
 import ReactDOM from "react-dom";
@@ -26,7 +27,10 @@ class App extends React.Component {
     if (!hasInputChanged) return null;
 
     const isWin = this.isWinGame();
-    if (isWin) this.initialiseNewLevel();
+    if (isWin) {
+      this.setCommonTime();
+      this.initialiseNewLevel();
+    }
   };
 
   getRandomWord = words => {
@@ -43,11 +47,16 @@ class App extends React.Component {
   };
 
   isWinGame = () => {
-    const { currentWord, input, timer } = this.state;
+    const { currentWord, input } = this.state;
+
+    return currentWord === input;
+  };
+
+  setCommonTime = () => {
+    const { timer } = this.state;
     this.setState(({ commonTime }) => ({
       commonTime: commonTime + timer
     }));
-    return currentWord === input;
   };
 
   onChangeHandler = e => {
@@ -58,7 +67,7 @@ class App extends React.Component {
   getUserFriendlyTime = ms => {
     const mseconds = ms % 1000;
     const seconds = Math.floor(ms / 1000) % 60;
-    const minutes = Math.floor(seconds / 60);
+    const minutes = Math.floor(ms / (1000 * 60));
     return `${`0${minutes}`.slice(-2)}:${`0${seconds}`.slice(
       -2
     )}:${`00${mseconds}`.slice(-3)}`;
@@ -66,7 +75,9 @@ class App extends React.Component {
 
   startTimer = () => {
     const startMSeconds = Date.now();
+
     clearInterval(this.state.timerId);
+
     const timerId = setInterval(() => {
       const currMSeconds = Date.now();
       const deltaMSeconds = currMSeconds - startMSeconds;
