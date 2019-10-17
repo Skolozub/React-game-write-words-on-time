@@ -1,5 +1,6 @@
 // init git (write all logic) - 1h 20m
 // code refactoring - 10m
+// added finished words output and backlight letters status - 40m
 
 import React from "react";
 import ReactDOM from "react-dom";
@@ -9,11 +10,13 @@ import styles from "./styles.module.scss";
 class App extends React.Component {
   state = {
     words: words,
-    currentWord: "",
+    randomWord: "",
+    letters: [],
     input: "",
     timerId: 0,
     timer: 0,
-    commonTime: 0
+    commonTime: 0,
+    finishedWords: []
   };
 
   componentDidMount = () => {
@@ -26,11 +29,21 @@ class App extends React.Component {
     const hasInputChanged = prevInput !== this.state.input;
     if (!hasInputChanged) return null;
 
-    const isWin = this.isWinGame();
-    if (isWin) {
+    this.lettersStatusCheck();
+
+    if (this.isWinGame()) {
+      this.setFinishedWords();
       this.setCommonTime();
       this.initialiseNewLevel();
     }
+  };
+
+  setFinishedWords = () => {
+    const { randomWord, timer } = this.state;
+
+    this.setState(({ finishedWords }) => ({
+      finishedWords: [...finishedWords, { word: randomWord, time: timer }]
+    }));
   };
 
   getRandomWord = words => {
@@ -41,15 +54,29 @@ class App extends React.Component {
   };
 
   initialiseNewLevel = () => {
-    const currentWord = this.getRandomWord(this.state.words);
+    const randomWord = this.getRandomWord(this.state.words);
+    const letters = [...randomWord].map(letter => ({ letter, status: 2 }));
+
     this.startTimer();
-    this.setState({ currentWord, input: "" });
+    this.setState({ randomWord, letters, input: "" });
+  };
+
+  lettersStatusCheck = () => {
+    const { letters, input } = this.state;
+
+    const newLetters = letters.map(({ letter }, i) =>
+      input[i] === undefined
+        ? { letter, status: 2 }
+        : { letter, status: Number(input[i] === letter) }
+    );
+
+    this.setState({ letters: newLetters });
   };
 
   isWinGame = () => {
-    const { currentWord, input } = this.state;
+    const { randomWord, input } = this.state;
 
-    return currentWord === input;
+    return randomWord === input;
   };
 
   setCommonTime = () => {
@@ -89,13 +116,32 @@ class App extends React.Component {
   };
 
   render = () => {
-    const { currentWord, input, timer, commonTime } = this.state;
+    const { letters, input, timer, commonTime, finishedWords } = this.state;
 
     return (
       <div className={styles.wrapper}>
-        <div className={styles.currentWord}>{currentWord}</div>
+        <div className={styles.letters}>
+          {[...letters].map(({ letter, status }) => (
+            <span
+              className={`${styles.letter} ${
+                status !== 2
+                  ? status
+                    ? styles.success
+                    : styles.failed
+                  : styles.default
+              }`}
+            >
+              {letter}
+            </span>
+          ))}
+        </div>
         <input onChange={this.onChangeHandler} value={input} />
         <div>{this.getUserFriendlyTime(timer)}</div>
+        <div>
+          {finishedWords.map(({ word, time }) => (
+            <div>{`${word} - ${this.getUserFriendlyTime(time)}`}</div>
+          ))}
+        </div>
         <div>Common Time: {this.getUserFriendlyTime(commonTime)}</div>
       </div>
     );
