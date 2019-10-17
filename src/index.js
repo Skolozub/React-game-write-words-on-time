@@ -1,6 +1,7 @@
 // init git (write all logic) - 1h 20m
 // code refactoring - 10m
 // added finished words output and backlight letters status - 40m
+// added some styles - 10m
 
 import React from "react";
 import ReactDOM from "react-dom";
@@ -88,7 +89,7 @@ class App extends React.Component {
 
   onChangeHandler = e => {
     const { value } = e.currentTarget;
-    this.setState({ input: value });
+    this.setState({ input: value.toLowerCase() });
   };
 
   getUserFriendlyTime = ms => {

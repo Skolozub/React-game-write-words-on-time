@@ -1,11 +1,14 @@
 .letter{
+  font-size: 30px;
+  letter-spacing: 3px;
+  text-shadow: 1px 1px 1px #484747;
   &.success{
-    color: green;
+    color: #15aa15;
   }
   &.failed{
-    color: red;
+    color: #ce8787;
   }
   &.default{
-    color: gray;
+    color: #b9b9b9;
   }
 }
